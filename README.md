@@ -1,45 +1,41 @@
-# Home Gym V6 — application iPhone (PWA)
+# Home Gym 7
 
-Application personnelle de suivi du programme A/B, en français, sans serveur ni abonnement.
+Carnet personnel de musculation A/B pour iPhone. L’archive contient un site statique prêt à héberger, avec les 13 démonstrations animées du programme et les icônes.
 
-## Fonctions
-- Séances A et B, 15 fiches d'exercices (exercices communs inclus), muscles, consignes et séries
-- Charges, couleurs/combinaisons d'élastiques, répétitions et cases « fait »
-- Brouillon enregistré au fil de la saisie, reprise d'une séance, historique modifiable
-- Dernières charges utilisées, chronomètre de repos 60/90/120 s
-- Graphiques de progression, export CSV et sauvegarde/restauration JSON
-- Mode hors ligne après installation, interface iPhone/iPad/ordinateur
-- Aucun compte, aucun cookie de suivi, aucune API externe
+## Mise à jour d’une installation existante
 
-## Publication gratuite : GitHub Pages
-1. Créer un compte GitHub (si nécessaire) et un dépôt public, par exemple `home-gym-v6`.
-2. Ajouter **le contenu** de ce dossier à la racine du dépôt : `index.html`, `style.css`, `app.js`, `sw.js`, `manifest.webmanifest` et `icons/`.
-3. Dans **Settings → Pages → Build and deployment**, choisir **Deploy from a branch**, `main` et `/ (root)` ; enregistrer.
-4. Attendre la publication, puis ouvrir l'URL `https://VOTRE_IDENTIFIANT.github.io/home-gym-v6/` dans Safari sur iPhone.
-5. Dans Safari, toucher **Partager → Sur l'écran d'accueil → Ajouter**.
-6. Ouvrir l'icône Home Gym. Après le premier chargement, l'application peut fonctionner hors ligne.
+1. Depuis l’app déjà installée, ouvre **Réglages → Exporter JSON**. Enregistre le fichier dans Fichiers.
+2. Pour mettre à jour une installation existante, remplace les fichiers de l’ancien hébergement par tout le contenu de cette archive, à la même adresse. Inclue les dossiers `icons` et `exercises`. L’app lit la même clé de stockage local et convertit les données à la première saisie. Après publication, ouvre l’app en ligne, puis ferme et rouvre-la si elle affiche encore l’ancienne version.
+3. Si tu changes d’adresse ou d’appareil, installe d’abord la nouvelle app, puis utilise **Réglages → Importer JSON** dans l’app installée. L’import remplace les données du stockage où tu l’effectues.
 
-**Important :** un dépôt GitHub Pages gratuit est normalement **public** : le code et le programme d'exercices sont visibles, mais **pas les séances personnelles**, qui restent enregistrées localement sur ton appareil. Ne publie jamais tes fichiers JSON de sauvegarde dans le dépôt.
+## Installer sur iPhone
 
-## Tester sur ordinateur
-Dans le dossier : `python -m http.server 8000`, puis ouvrir `http://localhost:8000`.
-Le mode hors ligne et l'installation sur iPhone nécessitent HTTPS (GitHub Pages le fournit). Un simple double-clic sur `index.html` n'est pas un test PWA fiable.
+- Héberge le contenu de l’archive à une adresse HTTPS. Pour GitHub Pages, place `index.html` et les autres fichiers à la racine publiée.
+- Dans Safari, ouvre l’adresse, touche **Partager → Sur l’écran d’accueil → Ajouter** et ouvre l’icône Home Gym une première fois avec une connexion.
+- Les séances, les démonstrations et le guide restent utilisables hors ligne après le premier chargement complet. Le chronomètre se recale quand tu reviens dans l’app. Le stockage est propre à cette installation et à cet appareil.
 
-## Sauvegarde et limites
-- Les données sont conservées dans `localStorage` sur l'appareil et dans le contexte de navigation utilisé ; elles **ne se synchronisent pas** entre iPhone, iPad et ordinateur.
-- Exporter régulièrement le JSON dans Fichiers/iCloud Drive. L'import remplace l'historique courant.
-- Effacer les données Safari, désinstaller l'app ou un nettoyage iOS peut entraîner une perte de données locales.
-- Le site héberge uniquement le code statique ; aucun serveur ne reçoit les charges saisies.
-- L'app est une PWA, pas une application native App Store. Certaines fonctions et politiques de stockage dépendent d'iOS.
-- Le programme d'entraînement n'est pas un protocole de rééducation. Les exercices du kiné restent séparés.
+## Pendant une séance
 
-## Mise à jour
-Modifier les fichiers et les repousser sur GitHub Pages. Le cache hors ligne est versionné dans `sw.js` (`CACHE`). Pour forcer le rafraîchissement des appareils lors d'une mise à jour, changer `home-gym-v6-1` en `home-gym-v6-2`, etc.
+- **Charge ou bandes**. Renseigne la valeur une fois. Le crayon est à côté de la valeur mémorisée. Un changement s’applique aux prochaines séries cochées. Les séries déjà validées gardent leur poids.
+- **Séries**. Touche la coche pour valider. Les répétitions affichées partent du bas de la fourchette du programme. Touche le nombre pour indiquer tes répétitions réelles, même après validation.
+- **Technique**. Ouvre la démonstration depuis un exercice ou le guide. Tu peux la mettre en pause, parcourir les positions avec le curseur ou passer directement au départ et à la fin de l’effort. Si la réduction des animations est activée sur l’appareil, lance la lecture avec le bouton.
+- **Repos**. Le compteur part par défaut après une série. Tu peux changer la durée ou désactiver le départ automatique dans Réglages.
+- **Journal**. Enregistre la séance quand tu as fini. Si tu quittes l’app entre-temps, elle laisse le brouillon dans le journal. Une modification de charge dans une séance du journal s’applique à cette séance. Pour corriger une série déjà validée, décoche-la, ajuste sa charge au crayon puis recoche-la.
+- **Sauvegarde**. Le JSON transporte l’historique, les brouillons, les charges et les réglages. Le CSV sert à consulter les séries dans un tableur.
 
+## Crunch à l’élastique
 
-## Visuels réalistes (v3)
-12 fiches incluent des démonstrations réalistes de départ et de fin du mouvement, générées pour cette application. Les images sont locales et mises en cache pour une consultation hors ligne. Le mouvement des mollets conserve un schéma. Les visuels sont pédagogiques, pas des captures Apple Fitness ni des vidéos.
+Les nouvelles séances A proposent le crunch à genoux face à un ancrage haut, à raison de 3 séries de 12 à 15 répétitions. Les charges à la poulie restent en kg dans les anciennes séances. Si tu avais déjà commencé à noter un crunch à la poulie dans un brouillon, tu peux terminer cette séance avec la même variante. [Référence Bodylastics](https://bodylastics.com/exercises/resistance-bands/abs/kneeling-crunch)
 
-## V6.1 — Validation visuelle des exercices
+## Changements depuis la V6
 
-Chaque exercice affiche désormais un indicateur de progression (0/3, 1/3, etc.). Dès que toutes ses séries sont cochées, une coche verte « Terminé » apparaît et sa fiche change subtilement de couleur. L'indicateur se met à jour immédiatement, y compris si une série est décochée. Les coches individuelles et l'enregistrement automatique restent inchangés.
+| Point observé | Mise à jour |
+| --- | --- |
+| Charge saisie dans chaque série et ancienne charge affichée en référence | Une charge mémorisée par exercice dans A et B. Les séries validées gardent leur valeur dans le journal. |
+| Saisie dispersée pendant les séances, nombreux boutons de repos | Cartes compactes, grandes coches, raccourcis de séance et chronomètre commun. |
+| Illustrations générées parfois incohérentes et schéma générique pour les mollets | Treize mouvements animés avec lecture, pause et positions accessibles à l’arrêt. Les élastiques sont dessinés en orange. Pour le leg curl debout, l’ancrage est bas devant toi, dans l’axe opposé au déplacement du talon. |
+| Une nouvelle séance à la même date pouvait écraser l’ancienne | Chaque enregistrement a son propre identifiant. Les corrections du journal et les brouillons du jour sont distincts. |
+| Les charges vides pouvaient apparaître à 0 kg dans le graphique | Seules les valeurs numériques renseignées entrent dans le graphique. Les combinaisons d’élastiques ont leur propre liste. |
+| Le cache V6 pouvait supprimer les caches d’autres apps sur la même adresse | Le nouveau service worker limite son nettoyage à ses versions et à son périmètre. |
+
+Hevy affiche les valeurs de la séance précédente et permet de les recopier d’un geste. Liftosaur propose une progression automatique configurable. Ici, la charge est reconduite automatiquement et tu décides quand la modifier. [Hevy](https://www.hevyapp.com/features/track-exercises/) · [Liftosaur](https://www.liftosaur.com/features/program-editor)

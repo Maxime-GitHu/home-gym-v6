@@ -1,82 +1,823 @@
 'use strict';
-const PROGRAM={A:[
-{id:'chest',name:'Développé poitrine',gear:'Home gym',muscles:'Pectoraux · triceps · deltoïdes antérieurs',sets:3,target:'10–12',tip:'Pousse les poignées vers l’avant, puis reviens lentement sans décoller le dos.',unit:'kg'},
-{id:'pulldown',name:'Tirage vertical',gear:'Home gym',muscles:'Grand dorsal · biceps · haut du dos',sets:3,target:'10–12',tip:'Tire vers le haut de la poitrine, jamais derrière la nuque. Épaules basses.',unit:'kg'},
-{id:'squat',name:'Squat avec 2 haltères',gear:'Haltères',muscles:'Quadriceps · fessiers · gainage du tronc',sets:3,target:'10–12',tip:'Un haltère dans chaque main, bras le long du corps. Plie hanches et genoux puis remonte en gardant les pieds au sol.',unit:'kg / haltère'},
-{id:'row',name:'Rowing horizontal',gear:'Élastiques · ancrage torse',muscles:'Grand dorsal · rhomboïdes · trapèzes moyens · biceps',sets:3,target:'10–15',tip:'Ramène les coudes en arrière sans hausser les épaules ni basculer le buste.',unit:'bande(s)'},
-{id:'curl',name:'Curl biceps',gear:'Haltères',muscles:'Biceps · brachial · avant-bras',sets:2,target:'10–12',tip:'Garde les coudes près du buste, monte sans élan puis redescends lentement.',unit:'kg / haltère'},
-{id:'lateral',name:'Élévations latérales',gear:'Haltères',muscles:'Deltoïdes moyens · stabilisateurs des épaules',sets:2,target:'12–15',tip:'Monte les bras sur les côtés sans hausser les épaules. Réduis la charge si nécessaire.',unit:'kg / haltère'},
-{id:'crunch',name:'Crunch à la poulie haute',gear:'Home gym · corde',muscles:'Grand droit de l’abdomen · obliques secondaires',sets:3,target:'12–15',tip:'Corde près des épaules, enroule le buste sans tirer avec les bras.',unit:'kg'}],B:[
-{id:'legcurl',name:'Leg curl',gear:'Élastiques · ancrage bas',muscles:'Ischio-jambiers',sets:3,target:'12–15 / jambe',tip:'Ramène le talon vers la fesse sans bouger le bassin. Fais chaque jambe.',unit:'bande(s)'},
-{id:'chest',name:'Développé poitrine',gear:'Home gym',muscles:'Pectoraux · triceps · deltoïdes antérieurs',sets:3,target:'10–12',tip:'Pousse sans verrouiller brutalement les coudes, contrôle le retour.',unit:'kg'},
-{id:'row',name:'Rowing horizontal',gear:'Élastiques · ancrage torse',muscles:'Grand dorsal · rhomboïdes · trapèzes moyens · biceps',sets:3,target:'10–15',tip:'Ramène les coudes en arrière, buste stable et épaules détendues.',unit:'bande(s)'},
-{id:'legext',name:'Leg extension',gear:'Élastiques · ancrage bas',muscles:'Quadriceps',sets:3,target:'12–15 / jambe',tip:'Tends le genou lentement sans à-coup, puis contrôle le retour.',unit:'bande(s)'},
-{id:'triceps',name:'Extension triceps',gear:'Home gym · poulie',muscles:'Triceps',sets:2,target:'10–12',tip:'Garde les coudes près du corps et tends les bras sans élan.',unit:'kg'},
-{id:'kickback',name:'Kickback fessiers',gear:'Élastiques · ancrage bas',muscles:'Grand fessier · stabilisateurs du bassin',sets:2,target:'12–15 / jambe',tip:'Pousse la jambe vers l’arrière sans cambrer le bas du dos.',unit:'bande(s)'},
-{id:'pallof',name:'Pallof press',gear:'Élastiques · ancrage torse',muscles:'Obliques · transverse · stabilisateurs du tronc',sets:3,target:'12 / côté',tip:'Place-toi de profil à l’ancrage. Tends les bras sans laisser tourner ton buste.',unit:'bande(s)'},
-{id:'calves',name:'Extensions des mollets',gear:'Haltères',muscles:'Gastrocnémiens · soléaire',sets:2,target:'15–20',tip:'Monte sur les pointes des pieds puis redescends lentement, avec appui stable.',unit:'kg / haltère'}]};
-// Illustrated exercise encyclopedia. Illustrations are simplified movement diagrams, not photographs.
-const EXPLAIN={
-chest:{setup:'Assieds-toi, dos en contact avec le dossier, poignées à hauteur de poitrine.',steps:['Pousse les poignées devant toi en soufflant.','Garde les épaules basses et les poignets alignés.','Reviens lentement sans laisser les poids claquer.'],avoid:'Épaules remontées, dos décollé, coudes verrouillés brutalement.',movement:'push',focus:'Poitrine'},
-pulldown:{setup:'Assieds-toi sous la barre, cuisses stabilisées et mains un peu plus larges que les épaules.',steps:['Abaisse les épaules puis tire les coudes vers les côtes.','Amène la barre vers le haut de la poitrine.','Remonte de manière contrôlée sans basculer en arrière.'],avoid:'Tirer derrière la nuque, donner un coup de dos ou hausser les épaules.',movement:'down',focus:'Dos'},
-squat:{setup:'Debout, un haltère dans chaque main le long du corps, pieds environ largeur d’épaules.',steps:['Recule légèrement les hanches et fléchis genoux et hanches.','Descends aussi bas que tu le contrôles, pieds bien à plat.','Remonte en poussant dans le sol et en soufflant.'],avoid:'Talons décollés, genoux qui s’effondrent vers l’intérieur, dos qui s’arrondit.',movement:'squat',focus:'Jambes'},
-row:{setup:'Élastique fixé à hauteur du sternum, recule jusqu’à obtenir une légère tension initiale.',steps:['Tiens les poignées, bras devant toi, buste stable.','Tire les coudes vers l’arrière en rapprochant doucement les omoplates.','Reviens lentement sans laisser l’élastique te tirer.'],avoid:'Hausser les épaules, cambrer ou tirer par à-coups.',movement:'row',focus:'Dos'},
-curl:{setup:'Debout ou assis, haltères le long du corps et coudes proches des flancs.',steps:['Plie les coudes pour monter les haltères.','Évite de balancer le tronc.','Redescends complètement mais sans relâcher brusquement.'],avoid:'Élan du dos, épaules qui avancent, poignets cassés.',movement:'curl',focus:'Bras'},
-lateral:{setup:'Debout ou assis, haltères légers près des cuisses, coudes souples.',steps:['Écarte les bras sur les côtés jusqu’à environ hauteur des épaules.','Garde les épaules basses et le mouvement contrôlé.','Redescends doucement.'],avoid:'Hausser les trapèzes, balancer le corps ou utiliser une charge excessive.',movement:'lateral',focus:'Épaules'},
-crunch:{setup:'À genoux face à la poulie haute, corde près des tempes, bassin relativement stable.',steps:['Contracte les abdominaux et enroule le haut du buste vers le bas.','Garde les mains près de la tête, sans tirer avec les bras.','Remonte lentement en contrôlant la charge.'],avoid:'Faire un simple mouvement de hanches ou tirer avec les bras.',movement:'crunch',focus:'Abdominaux'},
-legcurl:{setup:'Élastique fixé bas derrière toi et attaché à une cheville; tiens-toi à un support stable.',steps:['Garde les cuisses relativement fixes.','Plie le genou pour rapprocher le talon de la fesse.','Reviens lentement puis change de jambe.'],avoid:'Cambrer le dos, bouger le bassin ou laisser revenir l’élastique brutalement.',movement:'legcurl',focus:'Ischios'},
-legext:{setup:'Assis sur un support stable, élastique fixé bas derrière toi et attaché à une cheville.',steps:['Pars genou fléchi, pied libre de bouger.','Tends progressivement la jambe devant toi.','Replie lentement, sans forcer le verrouillage du genou.'],avoid:'À-coups, appui instable ou tension douloureuse dans le genou.',movement:'legext',focus:'Quadriceps'},
-triceps:{setup:'Debout devant la poulie haute, coudes près du buste.',steps:['Garde le haut des bras immobile.','Tends les coudes vers le bas en soufflant.','Remonte lentement jusqu’à une flexion confortable.'],avoid:'Faire bouger les épaules ou balancer le tronc.',movement:'triceps',focus:'Triceps'},
-kickback:{setup:'Élastique fixé bas devant toi et attaché à la cheville, mains sur un appui solide.',steps:['Garde le buste stable et le genou légèrement souple.','Pousse la jambe vers l’arrière sans cambrer.','Reviens doucement puis change de jambe.'],avoid:'Cambrure du bas du dos et grands mouvements incontrôlés.',movement:'kickback',focus:'Fessiers'},
-pallof:{setup:'Debout de profil à un élastique fixé à hauteur de poitrine, pieds écartés et genoux souples.',steps:['Tiens les poignées contre le sternum.','Tends les bras droit devant toi sans tourner le buste.','Ramène les mains vers la poitrine puis change de côté.'],avoid:'Tourner les épaules ou se pencher vers l’ancrage.',movement:'pallof',focus:'Tronc'},
-calves:{setup:'Debout, haltères le long du corps, une main près d’un support si nécessaire.',steps:['Monte lentement sur la pointe des pieds.','Marque un court arrêt en haut.','Redescends en contrôlant sans rebond.'],avoid:'Rebondir, rouler sur les chevilles ou perdre l’équilibre.',movement:'calves',focus:'Mollets'}
+
+const ICONS = {
+  logo: '<path d="M2 5v6m3-8v10m6-10v10m3-8v6M5 8h6"/>',
+  workout: '<path d="M2 5v6m3-8v10m6-10v10m3-8v6M5 8h6"/>',
+  history: '<rect x="2.5" y="4" width="11" height="9.5" rx="2"/><path d="M5 2.5v3m6-3v3M2.5 7h11m-8 3h2"/>',
+  progress: '<path d="M2.5 2.5v11h11m-8-3 2.5-3 2 1 3-4"/>',
+  guide: '<path d="M8 4v9.5M8 4c-1.5-1.4-3.2-1.7-5.5-1.5V12c2.2-.2 4 .2 5.5 1.5m0-9.5c1.5-1.4 3.2-1.7 5.5-1.5V12c-2.2-.2-4 .2-5.5 1.5"/>',
+  settings: '<path d="M2.5 4h11m-11 4h11m-11 4h11"/><circle cx="6" cy="4" r="1.4"/><circle cx="10.5" cy="8" r="1.4"/><circle cx="6" cy="12" r="1.4"/>',
+  edit: '<path d="m10.5 3 2.5 2.5M3 13l3.2-.7 7-7a1.8 1.8 0 0 0-2.5-2.5l-7 7L3 13Z"/>',
+  check: '<path d="m3.5 8 3 3 6-6"/>',
+  clock: '<circle cx="8" cy="8" r="5.5"/><path d="M8 4.7v3.5l2.2 1.1"/>',
+  close: '<path d="m4 4 8 8m0-8-8 8"/>',
+  down: '<path d="m4 6 4 4 4-4"/>',
+  plus: '<path d="M8 3.5v9m-4.5-4.5h9"/>',
+  minus: '<path d="M3.5 8h9"/>',
+  play: '<path d="M5 3v10l8-5-8-5Z" fill="currentColor" stroke="none"/>',
+  pause: '<path d="M5.5 4v8m5-8v8" stroke-width="2.8"/>',
+  download: '<path d="M8 2v8m-3-3 3 3 3-3m-8 4v2.5h10V11"/>'
 };
-function diagram(ex){
- const m=EXPLAIN[ex.id]?.movement||'push';
- const arrow={push:[210,112,276,112],down:[190,44,190,98],squat:[180,96,180,158],row:[262,115,198,115],curl:[242,164,214,116],lateral:[242,165,274,102],crunch:[195,85,226,143],legcurl:[258,178,225,147],legext:[227,162,282,162],triceps:[244,96,244,159],kickback:[239,169,295,169],pallof:[208,115,278,115],calves:[188,175,188,135]}[m];
- let [x1,y1,x2,y2]=arrow;
- const isLeg=['squat','legcurl','legext','kickback','calves'].includes(m),isBand=['row','legcurl','legext','kickback','pallof'].includes(m),isMachine=['chest','pulldown','crunch','triceps'].includes(ex.id);
- let posture=m==='squat'?`<path d="M170 69 L160 111 L191 133 L171 178 M191 133 L221 176 M160 111 L125 146 M160 111 L194 146"/>`:
- m==='crunch'?`<path d="M180 78 Q206 110 215 130 L193 158 M215 130 L240 159 M195 104 L239 109"/>`:
- `<path d="M182 71 L182 133 L165 182 M182 133 L208 182 M182 89 L${m==='lateral'?122:151} ${m==='lateral'?96:140} M182 89 L${m==='lateral'?246:216} ${m==='lateral'?96:140}"/>`;
- const accessory=isBand?`<path d="M72 67 L72 187 M63 96 L81 96" stroke="#7896a7" stroke-width="5"/><path d="M72 115 Q125 96 154 133" stroke="#e6a34b" stroke-width="3" stroke-dasharray="5 5"/>`:isMachine?`<path d="M85 45 L85 187 L126 187 M85 45 L151 45" stroke="#7896a7" stroke-width="6"/>`:`<rect x="136" y="140" width="15" height="22" rx="4" fill="#718c9d"/><rect x="213" y="140" width="15" height="22" rx="4" fill="#718c9d"/>`;
- return `<svg class="exercise-diagram" viewBox="0 0 360 220" role="img" aria-label="Schéma simplifié : ${esc(ex.name)}. Flèche indiquant le sens de l'effort."><defs><marker id="arrow-${m}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10Z" fill="#18a785"/></marker></defs><rect width="360" height="220" rx="18" fill="#eef7f5"/><path d="M32 190 H327" stroke="#b7cfc9" stroke-width="3"/>${accessory}<g stroke="#344d61" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" fill="none"><circle cx="182" cy="54" r="15" fill="#f3cdb1" stroke="#344d61" stroke-width="4"/>${posture}</g><path d="M${x1} ${y1} L${x2} ${y2}" stroke="#18a785" stroke-width="5" stroke-linecap="round" marker-end="url(#arrow-${m})"/><text x="24" y="27" font-size="13" fill="#47697a" font-weight="700">${esc(EXPLAIN[ex.id].focus.toUpperCase())}</text><text x="336" y="204" text-anchor="end" font-size="11" fill="#47697a">Schéma indicatif</text></svg>`
+const PAGES = {
+  workout: 'Séance',
+  history: 'Journal',
+  progress: 'Progression',
+  guide: 'Guide',
+  settings: 'Réglages'
+};
+const app = document.querySelector('#app');
+const editor = document.querySelector('#editor');
+let data;
+let storageProblem = '';
+try {
+  const stored = localStorage.getItem(STORE);
+  data = stored ? normalizeData(JSON.parse(stored)) : newData();
+} catch {
+  storageProblem = 'Les données locales sont illisibles ou indisponibles. Tu peux restaurer une sauvegarde dans Réglages.';
+  data = newData();
 }
-const PHOTO_IDS=new Set(['chest','pulldown','squat','row','curl','lateral','crunch','legcurl','legext','triceps','kickback','pallof']);
-function exerciseVisual(ex){if(!PHOTO_IDS.has(ex.id))return diagram(ex);return `<figure class="exercise-photo"><img src="./exercises/${ex.id}.webp" alt="Démonstration de ${esc(ex.name)} : position de départ à gauche, position finale à droite" loading="lazy" decoding="async"><figcaption><span>① Départ</span><span>② Mouvement</span></figcaption></figure>${ex.id==='crunch'?'<p class="small muted">Visuel à genoux : tu peux conserver ta variante habituelle à la poulie, en respectant les consignes de ton kiné.</p>':''}`}
-function help(ex){const d=EXPLAIN[ex.id];return `<details class="exercise-help"><summary>Voir le mouvement et les consignes <span aria-hidden="true">＋</span></summary><div class="help-inner">${exerciseVisual(ex)}<p><strong>Position :</strong> ${esc(d.setup)}</p><ol>${d.steps.map(x=>`<li>${esc(x)}</li>`).join('')}</ol><p class="avoid"><strong>À éviter :</strong> ${esc(d.avoid)}</p><p class="small muted">Illustration schématique : elle indique l'idée générale, pas une posture anatomique exacte.</p></div></details>`}
-const STORE='homegym_v6_data_v1';const initial=()=>({version:1,sessions:[],settings:{week:1,reminder:false},drafts:{}});let data;try{data=JSON.parse(localStorage.getItem(STORE))||initial();if(!Array.isArray(data.sessions)||typeof data.drafts!=='object')throw Error('invalid')}catch{data=initial()};let page='today',selectedWorkout=null,selectedDate=localDate(),editId=null,timerEnd=0,timerInterval=null,chartId='chest';
-function localDate(d=new Date()){let t=new Date(d.getTime()-d.getTimezoneOffset()*60000);return t.toISOString().slice(0,10)}
-function save(){try{localStorage.setItem(STORE,JSON.stringify(data));return true}catch(e){toast('Stockage indisponible : exporte tes données.');return false}}
-function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-function toast(s){let t=document.querySelector('#toast');t.textContent=s;t.classList.add('show');clearTimeout(toast.timer);toast.timer=setTimeout(()=>t.classList.remove('show'),2800)}
-function latest(){return [...data.sessions].sort((a,b)=>b.date.localeCompare(a.date)||b.created.localeCompare(a.created))[0]}
-function suggest(){let l=latest();return l?(l.workout==='A'?'B':'A'):'A'}
-function key(){return `${selectedDate}_${selectedWorkout}`}
-function findExisting(){return editId?data.sessions.find(s=>s.id===editId):data.sessions.find(s=>s.date===selectedDate&&s.workout===selectedWorkout)}
-function draft(){let e=findExisting();return structuredClone(data.drafts[key()]||e||{date:selectedDate,workout:selectedWorkout,notes:'',exercises:{}})}
-function prevExercise(id){for(let s of [...data.sessions].sort((a,b)=>b.date.localeCompare(a.date)||b.created.localeCompare(a.created))){if(s.id!==editId&&s.exercises?.[id]?.some(x=>x.done))return s.exercises[id].filter(x=>x.done)}return null}
-function countDone(s){return Object.values(s.exercises||{}).flat().filter(x=>x.done).length}
-function countTotal(w){return PROGRAM[w].reduce((n,x)=>n+x.sets,0)}
-function fmtDate(s){return new Date(s+'T12:00:00').toLocaleDateString('fr-BE',{weekday:'short',day:'numeric',month:'short',year:'numeric'})}
-function renderShell(){return `<header class="hero"><div class="shell"><div class="topline"><div><div class="eyebrow">Ton carnet personnel</div><h1>Home Gym <span style="color:#78d5b7">V6</span></h1><p>Progresser à ton rythme, séance après séance.</p></div><div class="round">🏋️</div></div></div></header><main class="shell"><nav class="tabs" aria-label="Navigation">${[['today','Ma séance'],['history','Historique'],['progress','Progression'],['guide','Guide'],['settings','Réglages']].map(([k,v])=>`<button class="tab ${page===k?'active':''}" data-page="${k}">${v}</button>`).join('')}</nav><div id="content"></div></main>`}
-function render(){document.querySelector('#app').innerHTML=renderShell();document.querySelectorAll('[data-page]').forEach(b=>b.onclick=()=>{persistDraft();page=b.dataset.page;editId=null;render()});document.querySelector('#content').innerHTML=({today:today,history:history,progress:progress,guide:guide,settings:settings})[page]();bind();}
-function today(){selectedWorkout=selectedWorkout||suggest();let d=draft(),all=countTotal(selectedWorkout),done=countDone(d);return `<div class="sectionhead"><div><div class="eyebrow" style="color:#19876d">Entraînement</div><h2>${editId?'Modifier une séance':'Ta prochaine séance'}</h2></div><span class="pill">${done} / ${all} séries</span></div><div class="card"><div class="cols"><label class="field">Date de séance<input id="date" type="date" value="${esc(selectedDate)}"></label><div class="field">Programme<div class="seg"><button data-workout="A" class="${selectedWorkout==='A'?'active':''}">Séance A</button><button data-workout="B" class="${selectedWorkout==='B'?'active':''}">Séance B</button></div></div></div><div class="bar"><div style="width:${Math.round(done/all*100)}%"></div></div><p class="small muted">${PROGRAM[selectedWorkout].length} exercices · ${all} séries · charges et répétitions sauvegardées pendant la saisie.</p></div>${PROGRAM[selectedWorkout].map((ex,i)=>exercise(ex,i,d)).join('')}<div class="card"><label class="field">Notes et sensations<textarea id="notes" placeholder="Énergie, douleur, adaptation, durée...">${esc(d.notes||'')}</textarea></label></div><div class="bottom"><div class="inner"><span class="small muted" id="status">${done} séries cochées</span><button class="btn primary" id="save-session">${editId?'Enregistrer les modifications':'Terminer et enregistrer'}</button></div></div>`}
-function exercise(ex,i,d){let vals=d.exercises?.[ex.id]||[],previous=prevExercise(ex.id);let completed=Array.from({length:ex.sets},(_,n)=>Boolean(vals[n]?.done)).filter(Boolean).length;return `<article class="card exercise-card ${completed===ex.sets?'exercise-complete':''}" data-ex-card="${ex.id}"><div class="exhead"><h3 class="exname"><span class="exnum">${i+1}</span>${esc(ex.name)}</h3><div class="ex-status"><span class="pill ${ex.unit==='bande(s)'?'blue':'gray'}">${ex.sets} × ${ex.target}</span><span class="exercise-check ${completed===ex.sets?'is-done':''}" data-ex-check="${ex.id}" aria-label="${completed===ex.sets?'Exercice terminé':'Exercice en cours'}"><span class="check-icon">${completed===ex.sets?'✓':''}</span><span class="check-label">${completed===ex.sets?'Terminé':completed+' / '+ex.sets+' séries'}</span></span></div></div><div class="muscles"><strong>Muscles :</strong> ${esc(ex.muscles)}</div><div class="small muted">${esc(ex.gear)}</div><div class="tip">${esc(ex.tip)}</div>${help(ex)}<div class="setgrid heading"><span>Série</span><span>${ex.unit==='bande(s)'?'Couleur / combinaison':'Charge · '+esc(ex.unit)}</span><span>Rép.</span><span>Fait</span></div>${Array.from({length:ex.sets},(_,n)=>{let v=vals[n]||{};return `<div class="setgrid"><span class="setno">${n+1}</span><input data-ex="${ex.id}" data-set="${n}" data-field="load" aria-label="${esc(ex.name)} série ${n+1} charge" placeholder="${ex.unit==='bande(s)'?'ex. rouge':'ex. 8'}" value="${esc(v.load||'')}"><input data-ex="${ex.id}" data-set="${n}" data-field="reps" type="number" inputmode="numeric" min="0" max="100" aria-label="${esc(ex.name)} série ${n+1} répétitions" placeholder="0" value="${esc(v.reps??'')}"><input data-ex="${ex.id}" data-set="${n}" data-field="done" type="checkbox" aria-label="${esc(ex.name)} série ${n+1} terminée" ${v.done?'checked':''}></div>`}).join('')}${previous?`<div class="prev">Dernière fois : ${previous.map(x=>`${esc(x.load||'—')} × ${esc(x.reps||0)}`).join(' · ')}</div>`:'<div class="prev">Première fois : note ta charge de référence.</div>'}<div class="toolbar" style="margin-top:12px"><button class="btn smallbtn outline" data-rest="60">Repos 1 min</button><button class="btn smallbtn outline" data-rest="90">1 min 30</button><button class="btn smallbtn outline" data-rest="120">2 min</button></div></article>`}
-function updateExerciseChecks(){for(let card of document.querySelectorAll('[data-ex-card]')){let id=card.dataset.exCard;let checks=[...card.querySelectorAll('input[data-field="done"]')];let count=checks.filter(x=>x.checked).length;let finished=checks.length>0&&count===checks.length;card.classList.toggle('exercise-complete',finished);let badge=card.querySelector('[data-ex-check]');if(badge){badge.classList.toggle('is-done',finished);badge.setAttribute('aria-label',finished?'Exercice terminé':'Exercice en cours');badge.querySelector('.check-icon').textContent=finished?'✓':'';badge.querySelector('.check-label').textContent=finished?'Terminé':`${count} / ${checks.length} séries`;}}}
-function persistDraft(){if(page!=='today'||!selectedWorkout)return;let d=draft();d.date=selectedDate;d.workout=selectedWorkout;document.querySelectorAll('[data-ex]').forEach(el=>{let ex=el.dataset.ex,n=Number(el.dataset.set);d.exercises[ex]??=[];d.exercises[ex][n]??={load:'',reps:'',done:false};d.exercises[ex][n][el.dataset.field]=el.dataset.field==='done'?el.checked:el.value});let note=document.querySelector('#notes');if(note)d.notes=note.value;data.drafts[key()]=d;save()}
-function history(){let sessions=[...data.sessions].sort((a,b)=>b.date.localeCompare(a.date)||b.created.localeCompare(a.created));return `<div class="sectionhead"><div><div class="eyebrow" style="color:#19876d">Journal</div><h2>Historique</h2></div><span class="pill blue">${sessions.length} séances</span></div>${!sessions.length?`<div class="card empty"><div class="emoji">📖</div><h3>Ton carnet commence ici</h3><p>Enregistre ta première séance pour retrouver tes charges.</p><button class="btn primary" data-goto="today">Commencer</button></div>`:sessions.map(s=>`<div class="card"><div class="historyrow"><div><strong>${fmtDate(s.date)} · Séance ${s.workout}</strong><div class="muted">${countDone(s)} / ${countTotal(s.workout)} séries validées</div></div><span class="pill">${s.workout}</span></div>${s.notes?`<p>${esc(s.notes)}</p>`:''}<div class="toolbar" style="margin-top:12px"><button class="btn smallbtn" data-edit="${esc(s.id)}">Ouvrir / modifier</button><button class="btn smallbtn danger" data-delete="${esc(s.id)}">Supprimer</button></div></div>`).join('')}`}
-function progress(){let s=data.sessions;let exes=[...new Map(Object.values(PROGRAM).flat().map(x=>[x.id,x])).values()];let valid=s.flatMap(x=>Object.values(x.exercises||{}).flat()).filter(x=>x.done).length;let last=latest();let ex=exes.find(x=>x.id===chartId)||exes[0];let points=[...s].sort((a,b)=>a.date.localeCompare(b.date)).map(x=>{let sets=(x.exercises?.[ex.id]||[]).filter(v=>v.done);let nums=sets.map(v=>Number(String(v.load).replace(',','.'))).filter(Number.isFinite);return {date:x.date,reps:sets.reduce((n,v)=>n+(Number(v.reps)||0),0),load:nums.length?Math.max(...nums):null,count:sets.length}}).filter(x=>x.count);return `<div class="sectionhead"><div><div class="eyebrow" style="color:#19876d">Tes résultats</div><h2>Progression</h2></div></div><div class="metrics"><div class="metric"><strong>${s.length}</strong><span>Séances</span></div><div class="metric"><strong>${valid}</strong><span>Séries validées</span></div><div class="metric"><strong>${last?fmtDate(last.date).split(' ').slice(0,3).join(' '):'—'}</strong><span>Dernière séance</span></div></div><div class="card"><label class="field">Exercice<select id="chart-ex">${exes.map(x=>`<option value="${x.id}" ${chartId===x.id?'selected':''}>${esc(x.name)}</option>`).join('')}</select></label><h3 style="margin:18px 0 3px">Total de répétitions validées</h3><p class="small muted">Par séance · même exercice</p>${makeChart(points.map(x=>({date:x.date,val:x.reps})))}<h3 style="margin:22px 0 3px">Charge maximale notée</h3><p class="small muted">Uniquement les charges numériques en kg. Pour les élastiques, consulte l'historique.</p>${makeChart(points.filter(x=>x.load!==null).map(x=>({date:x.date,val:x.load})))}<p class="small muted">Les graphiques servent au suivi, pas à comparer des résistances d’élastiques différentes.</p></div>`}
-function makeChart(points){if(!points.length)return `<div class="empty">Pas encore de données pour cet exercice.</div>`;let vals=points.map(x=>x.val),min=Math.min(0,...vals),max=Math.max(1,...vals),span=max-min;let xy=points.map((p,i)=>({x:points.length===1?170:36+i*(300/(points.length-1)),y:170-(p.val-min)/span*135}));return `<svg class="chart" viewBox="0 0 380 210" role="img" aria-label="Graphique de progression">${[0,1,2,3].map(i=>`<line x1="35" y1="${35+i*45}" x2="355" y2="${35+i*45}"/><text x="4" y="${39+i*45}">${Math.round(max-i*span/3)}</text>`).join('')}<polyline points="${xy.map(p=>p.x+','+p.y).join(' ')}"/>${xy.map((p,i)=>`<circle cx="${p.x}" cy="${p.y}" r="4"><title>${esc(points[i].date)} : ${points[i].val}</title></circle>`).join('')}<text x="35" y="199">${esc(points[0].date.slice(5))}</text><text x="300" y="199">${esc(points[points.length-1].date.slice(5))}</text></svg>`}
-function guide(){let week=Number(data.settings.week)||1;return `<div class="sectionhead"><div><div class="eyebrow" style="color:#19876d">Mode d'emploi</div><h2>Ton programme V6</h2></div></div><div class="card"><h3>Alternance sur deux semaines</h3><p>Dimanche, mardi et jeudi. Alterne A/B/A puis B/A/B.</p><div class="seg"><button data-week="1" class="${week===1?'active':''}">Semaine 1</button><button data-week="2" class="${week===2?'active':''}">Semaine 2</button></div><div class="week">${['Dimanche','Mardi','Jeudi'].map((d,i)=>`<div class="day"><span class="small muted">${d}</span><b>${(week===1?['A','B','A']:['B','A','B'])[i]}</b></div>`).join('')}</div></div><div class="card"><h3>Repères d'entraînement</h3><p><strong>Échauffement :</strong> 5 minutes de marche ou vélo doux, puis une série légère du premier exercice.</p><p><strong>Intensité :</strong> garde environ 1 à 2 répétitions possibles en fin de série.</p><p><strong>Repos :</strong> 90–120 s pour les mouvements principaux, 60–90 s pour l'isolation.</p><p><strong>Progression :</strong> quand toutes les séries atteignent le haut de la fourchette avec une bonne technique, augmente légèrement la charge.</p><p><strong>Élastiques :</strong> note les bandes et garde une distance similaire à l'ancrage ; la force varie avec l'étirement.</p></div><div class="notice warning">Les exercices de rééducation du kiné restent séparés. Si un mouvement déclenche ou aggrave ta douleur près de l'omoplate, arrête-le et demande conseil à ton kiné. Les shrugs (2 × 12–15) restent facultatifs et seulement après son accord.</div><div class="card"><h3>Bibliothèque des exercices</h3><p class="small muted">Ouvre chaque fiche pour voir le schéma, la position, les étapes et les erreurs fréquentes.</p>${[...new Map(Object.values(PROGRAM).flat().map(x=>[x.id,x])).values()].map(x=>`<div class="guide-ex"><strong>${esc(x.name)}</strong><div class="small muted">${esc(x.muscles)}</div>${help(x)}</div>`).join('')}</div><div class="card"><h3>À propos de tes abdos</h3><p>En A : crunch à la poulie haute. En B : Pallof press à l'élastique. Le premier travaille surtout la flexion du tronc ; le second résiste à la rotation.</p></div>`}
-function settings(){return `<div class="sectionhead"><div><div class="eyebrow" style="color:#19876d">Contrôle de tes données</div><h2>Réglages et sauvegarde</h2></div></div><div class="notice">Tes données sont stockées dans ce navigateur, sur cet appareil. Elles ne sont envoyées à aucun serveur par cette application. <strong>Fais des sauvegardes JSON régulières</strong> : iOS peut effacer les données locales, notamment si tu supprimes l'application ou les données du site.</div><div class="card"><h3>Sauvegarder / restaurer</h3><p>Le JSON contient toutes tes séances, notes et brouillons. Conserve-le dans Fichiers ou iCloud Drive. L'import remplace les données présentes sur cet appareil.</p><div class="toolbar"><button class="btn primary" id="export-json">Exporter JSON</button><button class="btn outline" id="export-csv">Exporter CSV</button><label class="btn outline" style="cursor:pointer">Importer JSON<input type="file" id="import-json" accept="application/json,.json" hidden></label></div></div><div class="card"><h3>Installer sur iPhone</h3><p>Publie ces fichiers sur un site HTTPS (GitHub Pages, par exemple), puis ouvre l'adresse dans <strong>Safari</strong>. Appuie sur <strong>Partager → Sur l'écran d'accueil → Ajouter</strong>.</p><p>L'application fonctionne ensuite hors ligne après le premier chargement complet. Un simple fichier HTML ouvert depuis l'app Fichiers ne permet pas l'installation PWA.</p></div><div class="card"><h3>Confidentialité et entretien</h3><p>Sans compte, sans publicité, sans analyse d'audience et sans dépendance à un service tiers. Le stockage n'est pas synchronisé entre appareils.</p><button class="btn danger" id="erase">Effacer toutes les données</button></div>`}
-function bind(){document.querySelectorAll('[data-goto]').forEach(b=>b.onclick=()=>{page=b.dataset.goto;render()});if(page==='today'){document.querySelector('#date').onchange=e=>{persistDraft();selectedDate=e.target.value;editId=null;render()};document.querySelectorAll('[data-workout]').forEach(b=>b.onclick=()=>{persistDraft();selectedWorkout=b.dataset.workout;editId=null;render()});document.querySelectorAll('[data-ex],#notes').forEach(el=>{el.addEventListener('input',persistDraft);el.addEventListener('change',()=>{persistDraft();if(el.dataset.field==='done'){updateExerciseChecks();let d=draft();let count=countDone(d),total=countTotal(selectedWorkout);document.querySelector('#status').textContent=`${count} séries cochées`;document.querySelector('.sectionhead .pill').textContent=`${count} / ${total} séries`;document.querySelector('.bar div').style.width=Math.round(count/total*100)+'%'}})});document.querySelectorAll('[data-rest]').forEach(b=>b.onclick=()=>startTimer(Number(b.dataset.rest)));document.querySelector('#save-session').onclick=saveSession}
-if(page==='history'){document.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>{let s=data.sessions.find(x=>x.id===b.dataset.edit);if(!s)return;selectedDate=s.date;selectedWorkout=s.workout;editId=s.id;page='today';render()});document.querySelectorAll('[data-delete]').forEach(b=>b.onclick=()=>{if(!confirm('Supprimer définitivement cette séance ?'))return;data.sessions=data.sessions.filter(x=>x.id!==b.dataset.delete);save();render();toast('Séance supprimée')})}
-if(page==='progress')document.querySelector('#chart-ex').onchange=e=>{chartId=e.target.value;render()};if(page==='guide')document.querySelectorAll('[data-week]').forEach(b=>b.onclick=()=>{data.settings.week=Number(b.dataset.week);save();render()});if(page==='settings'){document.querySelector('#export-json').onclick=()=>download('home-gym-v6-sauvegarde-'+localDate()+'.json',JSON.stringify({app:'Home Gym V6',exported:new Date().toISOString(),data},null,2),'application/json');document.querySelector('#export-csv').onclick=exportCsv;document.querySelector('#import-json').onchange=importJson;document.querySelector('#erase').onclick=()=>{if(!confirm('Effacer définitivement TOUTES les séances et brouillons de cet appareil ?'))return;if(!confirm('Dernière confirmation : as-tu exporté une sauvegarde ?'))return;data=initial();save();selectedWorkout=null;render();toast('Données effacées')}}}
-function saveSession(){persistDraft();let d=draft();let hasAny=Object.values(d.exercises||{}).flat().some(x=>x.done);if(!hasAny){toast('Coche au moins une série avant d’enregistrer.');return}let existing=findExisting();d.id=existing?.id||('s_'+Date.now()+'_'+Math.random().toString(36).slice(2,7));d.created=existing?.created||new Date().toISOString();if(existing)data.sessions=data.sessions.map(s=>s.id===existing.id?d:s);else data.sessions.push(d);delete data.drafts[key()];if(!save())return;editId=null;selectedWorkout=d.workout==='A'?'B':'A';page='history';render();toast('Séance enregistrée ✓')}
-function startTimer(seconds){timerEnd=Date.now()+seconds*1000;clearInterval(timerInterval);function tick(){let left=Math.max(0,Math.ceil((timerEnd-Date.now())/1000));let el=document.querySelector('#status');if(el)el.textContent=left?`Repos · ${Math.floor(left/60)}:${String(left%60).padStart(2,'0')}`:'Repos terminé ✓';if(!left){clearInterval(timerInterval);if(navigator.vibrate)navigator.vibrate([120,100,120]);toast('Temps de repos terminé')}}tick();timerInterval=setInterval(tick,300)}
-function download(name,content,type){let url=URL.createObjectURL(new Blob([content],{type:type+';charset=utf-8'})),a=document.createElement('a');a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),5000)}
-function csvCell(v){return '"'+String(v??'').replaceAll('"','""')+'"'}
-function exportCsv(){let rows=[['Date','Séance','Exercice','Série','Charge / bande','Répétitions','Validée','Notes']];for(let s of data.sessions)for(let [id,sets] of Object.entries(s.exercises||{}))for(let [i,v] of sets.entries())rows.push([s.date,s.workout,Object.values(PROGRAM).flat().find(x=>x.id===id)?.name||id,i+1,v.load,v.reps,v.done?'Oui':'Non',s.notes]);download('home-gym-v6-historique-'+localDate()+'.csv','\ufeff'+rows.map(r=>r.map(csvCell).join(';')).join('\r\n'),'text/csv')}
-async function importJson(e){let file=e.target.files?.[0];if(!file)return;try{let obj=JSON.parse(await file.text()),next=obj.data||obj;if(!Array.isArray(next.sessions)||typeof next.drafts!=='object'||!next.settings||next.sessions.some(s=>!['A','B'].includes(s.workout)||typeof s.exercises!=='object'))throw Error('Format invalide');if(!confirm(`Importer ${next.sessions.length} séance(s) ? Cela remplacera toutes les données actuelles sur cet appareil.`))return;data=next;if(!save())return;selectedWorkout=null;editId=null;render();toast('Sauvegarde importée ✓')}catch(err){toast('Impossible de lire ce fichier de sauvegarde.')}}
-render();if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});
+let page = 'workout';
+let selection = nextDateWorkout(data);
+let editId = null;
+let workout = makeDraft(data, selection, editId);
+let chartId = 'chest';
+let editorTrigger = null;
+let stopMotion = null;
+let notifiedTimer = null;
+let toastTimeout;
+
+function icon(name, size = 20) {
+  return `<svg width="${size}" height="${size}" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name]}</svg>`;
+}
+
+function escapeHTML(value) {
+  return String(value ?? '').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+}
+
+function formatDate(value, options = {weekday:'long', day:'numeric', month:'long'}) {
+  return new Date(value + 'T12:00:00').toLocaleDateString('fr-BE', options);
+}
+
+function toast(message) {
+  const element = document.querySelector('#toast');
+  element.textContent = message;
+  element.classList.add('visible');
+  clearTimeout(toastTimeout);
+  toastTimeout = setTimeout(() => element.classList.remove('visible'), 3000);
+}
+
+function commit(next, replace = false) {
+  if (storageProblem && !replace) {
+    toast('Restaure une sauvegarde ou réinitialise le stockage dans Réglages.');
+    return false;
+  }
+  try {
+    localStorage.setItem(STORE, JSON.stringify(next));
+  } catch {
+    toast('Impossible d’enregistrer sur cet appareil.');
+    return false;
+  }
+  data = next;
+  storageProblem = '';
+  return true;
+}
+
+function storeWorkout(next = workout, loads = data.loads, timer = data.timer) {
+  const key = draftKey(selection, editId);
+  if (!commit({...data, loads, timer, drafts: {...data.drafts, [key]: next}})) return false;
+  workout = next;
+  return true;
+}
+
+function navigation() {
+  return `<nav class="navigation" aria-label="Navigation principale">
+    ${Object.entries(PAGES).map(([id, label]) => `
+      <button type="button" data-page="${id}" ${page === id ? 'aria-current="page"' : ''}>
+        ${icon(id)}<span>${label}</span>
+      </button>`).join('')}
+  </nav>`;
+}
+
+function render({keepPosition = false, focusId = ''} = {}) {
+  const top = window.scrollY;
+  app.innerHTML = `<div class="frame">
+    <header class="sidebar">
+      <button class="wordmark" data-page="workout" aria-label="Home Gym, séance">
+        <span class="brand-icon">${icon('logo', 23)}</span><span>HOME<span class="brand-space"> </span>GYM</span>
+      </button>
+      ${navigation()}
+      <div class="sidebar-foot">Carnet d’entraînement</div>
+    </header>
+    <main id="content" tabindex="-1">
+      ${storageProblem ? `<p class="notice warning" role="alert">${escapeHTML(storageProblem)}</p>` : ''}
+      ${{workout: workoutPage, history: historyPage, progress: progressPage, guide: guidePage, settings: settingsPage}[page]()}
+    </main>
+    <div id="timer" class="timer-panel" hidden></div>
+  </div>`;
+  updateTimer(false);
+  window.scrollTo(0, keepPosition ? top : 0);
+  if (focusId) document.getElementById(focusId)?.focus({preventScroll: true});
+}
+
+function workoutPage() {
+  const count = countDone(workout);
+  const total = totalSets(workout.workout);
+  const exercises = exercisesFor(workout.workout, usesCableCrunch(workout, Boolean(editId)));
+  const next = exercises.find(ex => workout.exercises[ex.id].some(set => !set.done));
+  const setWord = count === 1 ? 'série validée' : 'séries validées';
+  return `
+    <div class="page-heading">
+      <div><p class="overline">${escapeHTML(formatDate(workout.date))}</p><h1>${editId ? 'Modifier la séance' : 'Ma séance'}</h1></div>
+      ${editId ? '<button class="button secondary" data-action="exit-edit">Retour au journal</button>' :
+        `<label class="date-field" title="Date de séance">${icon('history',18)}<span> Date</span><input id="workout-date" type="date" aria-label="Date de séance" value="${escapeHTML(selection.date)}"></label>`}
+    </div>
+    <section class="session-banner" aria-label="Progression de la séance">
+      <div class="banner-content">
+        ${editId ? `<span class="session-label">Séance ${workout.workout}</span>` :
+          `<div class="segments banner-switch" role="group" aria-label="Choisir le programme">
+            ${['A','B'].map(id => `<button type="button" id="workout-${id}" data-workout="${id}" aria-pressed="${selection.workout === id}">Séance ${id}</button>`).join('')}
+          </div>`}
+        <p class="banner-title">${count === total ? 'Séance complète' : 'Au programme'}</p>
+        <p class="banner-meta">${exercises.length} exercices <span>·</span> ${total} séries</p>
+      </div>
+      <div class="banner-status">
+        <p><strong>${count}<span> / ${total}</span></strong> ${setWord}</p>
+        <progress max="${total}" value="${count}" aria-label="Séries validées"></progress>
+        ${next ? `<a class="next-exercise" href="#exercise-${next.id}">${count ? 'Reprendre la séance' : 'Aller au premier exercice'}</a>` : ''}
+      </div>
+    </section>
+    <div class="session-shortcuts">
+      ${!editId ? `<button class="button secondary" id="quick-rest" data-action="choose-rest">${icon('clock', 18)} Repos</button>` : ''}
+      <a class="button secondary" href="#finish-session">${icon('check', 17)} Fin de séance</a>
+    </div>
+    <div class="workout-layout">
+      <section class="exercise-list" aria-label="Exercices de la séance">
+        <h2>Exercices</h2>
+        ${exercises.map(exerciseCard).join('')}
+      </section>
+      <aside class="session-aside" aria-label="Enregistrement et repos">
+        ${!editId ? restCard() : ''}
+        <section class="card finish-card" id="finish-session">
+          <h2>${editId ? 'Modifications' : 'Fin de séance'}</h2>
+          <label class="field" for="session-notes">Note <span>facultative</span></label>
+          <textarea id="session-notes" rows="2" maxlength="4000" placeholder="Comment s’est passée la séance ?">${escapeHTML(workout.notes)}</textarea>
+          <button class="button primary" data-action="save-session" ${count ? '' : 'disabled'}>${icon('check',18)} ${editId ? 'Enregistrer les modifications' : 'Enregistrer la séance'}</button>
+          <p class="save-hint">${count ? (count < total ? 'Le journal comptabilise les séries cochées.' : 'Tes séries sont prêtes pour le journal.') : 'Coche une série pour pouvoir enregistrer.'}</p>
+        </section>
+      </aside>
+    </div>`;
+}
+
+function exerciseCard(ex) {
+  const sets = workout.exercises[ex.id];
+  const done = sets.filter(set => set.done).length;
+  const load = exerciseLoad(data, workout, ex.id, Boolean(editId));
+  const resistance = isBand(ex) ? 'Bandes' : 'Charge';
+  const label = load ? displayLoad(ex, load) : workout.skipped[ex.id] ? 'Non renseignée' : '';
+  return `<article class="card exercise ${done === sets.length ? 'complete' : ''}" id="exercise-${ex.id}">
+    <div class="exercise-heading">
+      <div class="exercise-name"><span class="exercise-group">${escapeHTML(EXPLAIN[ex.id].focus)}</span><h3>${escapeHTML(ex.name)}</h3>
+        <p>${escapeHTML(ex.gear)} <span>·</span> ${sets.length} × ${escapeHTML(ex.target)}</p></div>
+      <span class="set-count" aria-label="${done} séries validées sur ${sets.length}">${done === sets.length ? icon('check', 15) : ''}${done}/${sets.length}</span>
+    </div>
+    <div class="exercise-controls">
+      <button class="load-button ${label ? 'has-load' : ''}" id="load-${ex.id}" data-action="load" data-ex="${ex.id}" aria-label="${(label ? 'Modifier ' : 'Renseigner ') + resistance.toLowerCase()} – ${escapeHTML(ex.name)}${label ? ', ' + escapeHTML(label) : ''}">
+        ${icon(label ? 'edit' : 'plus', 17)} <span>${label ? escapeHTML(label) : (isBand(ex) ? 'Renseigner les bandes' : 'Renseigner la charge')}</span>
+      </button>
+      <button class="technique-button" id="tech-${ex.id}" data-action="technique" data-ex="${ex.id}" aria-label="Technique – ${escapeHTML(ex.name)}">${icon('guide', 17)}<span>Technique</span></button>
+    </div>
+    <div class="set-grid" style="--set-count:${sets.length}">
+      ${sets.map((set, index) => setCell(ex, set, index, load)).join('')}
+    </div>
+  </article>`;
+}
+
+function setCell(ex, set, index, current) {
+  const number = index + 1;
+  const reps = set.reps || (set.done ? '—' : defaultReps(ex));
+  const differentLoad = set.done && set.load !== current;
+  const actualLoad = set.load ? displayLoad(ex, set.load) : 'Sans charge notée';
+  return `<div class="set-cell ${set.done ? 'checked' : ''}">
+    <div class="set-info"><span>Série ${number}</span>
+      <button class="reps-button" id="reps-${ex.id}-${index}" data-action="reps" data-ex="${ex.id}" data-set="${index}" aria-label="Modifier les répétitions de la série ${number}, ${escapeHTML(ex.name)}, ${escapeHTML(reps)}">${escapeHTML(reps)} <small>rép.</small></button>
+    </div>
+    <button class="set-check" id="set-${ex.id}-${index}" data-action="set" data-ex="${ex.id}" data-set="${index}" aria-label="${set.done ? 'Décocher' : 'Valider'} la série ${number}, ${escapeHTML(ex.name)}" aria-pressed="${set.done}">${icon('check', 19)}</button>
+    ${differentLoad ? `<small class="set-load">${escapeHTML(actualLoad)}</small>` : ''}
+  </div>`;
+}
+
+function restCard() {
+  return `<section class="card rest-card">
+    <h2>${icon('clock', 20)} Repos</h2>
+    <div class="segments rest-options" role="group" aria-label="Lancer le repos">
+      ${[[60, '1:00'], [90, '1:30'], [120, '2:00']].map(([seconds, label]) => `<button data-action="start-timer" data-seconds="${seconds}">${label}</button>`).join('')}
+    </div>
+    <p>${data.settings.autoRest ? `Départ automatique après une série · ${clockText(data.settings.rest)}` : 'Départ manuel'}</p>
+  </section>`;
+}
+
+function historyPage() {
+  const sessions = sortSessions(data.sessions);
+  const drafts = Object.entries(data.drafts).filter(([key, draft]) => !key.startsWith('edit_') && (countDone(draft) || draft.notes || Object.keys(draft.loads).length || Object.values(draft.exercises).flat().some(set => set.reps)));
+  return `<div class="page-heading"><div><h1>Journal</h1><p class="subtitle">${sessions.length} séance${sessions.length === 1 ? '' : 's'} enregistrée${sessions.length === 1 ? '' : 's'}</p></div></div>
+    ${drafts.length ? `<h2>Séances en cours</h2><div class="record-grid">${[...drafts].reverse().map(([, draft]) => `
+      <article class="card record"><p class="record-date">${escapeHTML(formatDate(draft.date))}</p><h3>Séance ${draft.workout}</h3><p>${countDone(draft)} / ${totalSets(draft.workout)} séries</p>
+        <button class="button secondary" data-action="resume" data-date="${draft.date}" data-workout="${draft.workout}">Reprendre</button></article>`).join('')}</div>` : ''}
+    <h2>Séances enregistrées</h2>
+    ${sessions.length ? `<div class="record-grid">${sessions.map(session => `<article class="card record">
+      <p class="record-date">${escapeHTML(formatDate(session.date, {weekday:'short', day:'numeric', month:'long', year:'numeric'}))}</p>
+      <h3>Séance ${session.workout}</h3><p>${countDone(session)} / ${totalSets(session.workout)} séries validées</p>
+      ${session.notes ? `<p class="record-note">${escapeHTML(session.notes)}</p>` : ''}
+      <div class="actions"><button class="button secondary" data-action="edit-session" data-id="${escapeHTML(session.id)}">Ouvrir</button>
+        <button class="button text-danger" data-action="delete-session" data-id="${escapeHTML(session.id)}">Supprimer</button></div></article>`).join('')}</div>`
+      : '<div class="card empty"><h3>Le journal est encore vide</h3><p>Tes séances apparaîtront ici après leur enregistrement.</p><button class="button primary" data-page="workout">Ouvrir ma séance</button></div>'}`;
+}
+
+function chart(points, label) {
+  if (!points.length) return '<p class="empty-chart">Les valeurs apparaîtront après une séance enregistrée.</p>';
+  const max = Math.max(1, ...points.map(point => point.value));
+  const xy = points.map((point, index) => [points.length === 1 ? 252 : 42 + index * 420 / (points.length - 1), 142 - point.value * 115 / max]);
+  const format = value => new Intl.NumberFormat('fr-BE', {maximumFractionDigits: 2}).format(value);
+  const dateLabel = point => formatDate(point.date, {day:'numeric', month:'short'});
+  return `<svg class="chart" viewBox="0 0 496 172" role="img" aria-label="${escapeHTML(label)}">
+    ${[0,1,2,3].map(index => `<line x1="42" x2="462" y1="${27 + index * 115 / 3}" y2="${27 + index * 115 / 3}"/><text x="2" y="${31 + index * 115 / 3}">${format(max * (3-index) / 3)}</text>`).join('')}
+    <polyline points="${xy.map(point => point.join(',')).join(' ')}"/>
+    ${xy.map(([x, y], index) => `<circle cx="${x}" cy="${y}" r="4"><title>${escapeHTML(dateLabel(points[index]))}, ${format(points[index].value)}</title></circle>`).join('')}
+    <text text-anchor="${points.length === 1 ? 'middle' : 'start'}" x="${xy[0][0]}" y="165">${escapeHTML(dateLabel(points[0]))}</text>
+    ${points.length > 1 ? `<text text-anchor="end" x="462" y="165">${escapeHTML(dateLabel(points.at(-1)))}</text>` : ''}
+  </svg><p class="chart-last">Dernière valeur <strong>${format(points.at(-1).value)}</strong></p>`;
+}
+
+function progressPage() {
+  const showCableCrunch = data.sessions.some(session => session.exercises.crunch?.some(set => set.done));
+  const choices = showCableCrunch ? TRACKED_EXERCISES : EXERCISES;
+  if (!choices.some(ex => ex.id === chartId)) chartId = choices[0].id;
+  const ex = choices.find(item => item.id === chartId);
+  const points = sortSessions(data.sessions).reverse().flatMap(session => {
+    const sets = (session.exercises[chartId] || []).filter(set => set.done);
+    if (!sets.length) return [];
+    const loads = sets.filter(set => numericLoad.test(set.load)).map(set => Number(set.load.replace(',', '.'))).filter(Number.isFinite);
+    const bands = [...new Set(sets.map(set => set.load).filter(hasLoad))];
+    return [{date: session.date, reps: sets.reduce((sum, set) => sum + (Number(set.reps) || 0), 0), load: loads.length ? Math.max(...loads) : null, bands}];
+  });
+  return `<div class="page-heading"><div><h1>Progression</h1><p class="subtitle">À partir des séries validées dans le journal.</p></div></div>
+    <div class="metrics"><div class="card"><strong>${data.sessions.length}</strong><span>Séances</span></div><div class="card"><strong>${data.sessions.reduce((count, session) => count + countDone(session), 0)}</strong><span>Séries validées</span></div></div>
+    <section class="card settings-card">
+      <label class="field" for="chart-ex">Exercice</label>
+      <select id="chart-ex">${choices.map(item => `<option value="${item.id}" ${item.id === chartId ? 'selected' : ''}>${escapeHTML(item.name)}</option>`).join('')}</select>
+      <h2>Répétitions par séance</h2>
+      ${chart(points.map(point => ({date: point.date, value: point.reps})), 'Total des répétitions validées par séance')}
+      ${isBand(ex) ? `<h2>Bandes utilisées</h2><ul class="band-history">${points.filter(point => point.bands.length).slice(-6).reverse().map(point => `<li>${escapeHTML(formatDate(point.date, {day:'numeric', month:'short', year:'numeric'}))}<strong>${escapeHTML(point.bands.join(' · '))}</strong></li>`).join('') || '<li>Aucune bande renseignée pour cet exercice.</li>'}</ul>`
+          : `<h2>Charge maximale <small>${escapeHTML(ex.unit)}</small></h2>${chart(points.flatMap(point => point.load === null ? [] : [{date: point.date, value: point.load}]), 'Charge maximale validée par séance')}`}
+    </section>`;
+}
+
+function guidePage() {
+  return `<div class="page-heading"><div><h1>Guide</h1><p class="subtitle">Ton programme A/B et les gestes, exercice par exercice.</p></div></div>
+    <section class="card settings-card">
+      <h2>Ton programme A/B</h2>
+      <div class="segments" role="group" aria-label="Semaine du programme">${[1,2].map(week => `<button id="week-${week}" data-action="week" data-week="${week}" aria-pressed="${data.settings.week === week}">Semaine ${week}</button>`).join('')}</div>
+      <div class="week">${['Dimanche','Mardi','Jeudi'].map((day, index) => `<div><span>${day}</span><strong>${(data.settings.week === 1 ? 'ABA' : 'BAB')[index]}</strong></div>`).join('')}</div>
+      <ul class="guide-notes">
+        <li>Échauffement prévu dans ton programme : 5 min de marche ou de vélo doux, puis une série légère du premier exercice.</li>
+        <li>Comme repère, garde environ 1 à 2 répétitions possibles en fin de série. Quand toutes les séries atteignent le haut de la fourchette avec un geste maîtrisé, augmente légèrement la charge.</li>
+        <li>Pour les élastiques, garde des bandes et une distance à l’ancrage comparables d’une séance à l’autre.</li>
+        <li>Garde les exercices de rééducation du kiné séparés. Si un mouvement réveille la douleur près de l’omoplate, arrête-le et demande conseil à ton kiné. Les shrugs restent facultatifs, après son accord.</li>
+      </ul>
+    </section>
+    <h2>Bibliothèque des exercices</h2>
+    <div class="library-list">${EXERCISES.map(ex => `<button class="library-item card" id="guide-${ex.id}" data-action="technique" data-ex="${ex.id}">
+      <span><strong>${escapeHTML(ex.name)}</strong><small>${escapeHTML(ex.gear)}</small></span>${icon('guide', 20)}
+    </button>`).join('')}</div>`;
+}
+
+function settingsPage() {
+  return `<div class="page-heading"><div><h1>Réglages</h1></div></div>
+    <section class="card settings-card">
+      <h2>Chronomètre de repos</h2>
+      <label class="toggle"><input id="auto-rest" type="checkbox" ${data.settings.autoRest ? 'checked' : ''}><span>Lancer après chaque série validée</span></label>
+      <label class="field" for="rest-duration">Durée par défaut</label>
+      <select id="rest-duration">${[60,90,120].map(seconds => `<option value="${seconds}" ${data.settings.rest === seconds ? 'selected' : ''}>${clockText(seconds)}</option>`).join('')}</select>
+    </section>
+    <section class="card settings-card">
+      <h2>Données et sauvegarde</h2>
+      <p>Tes séances, tes brouillons et tes charges restent dans le stockage de cette app sur cet appareil. Pour les transférer vers une nouvelle adresse ou un autre appareil, exporte puis importe un JSON. Les sauvegardes Home Gym V6 sont compatibles.</p>
+      <div class="actions"><button class="button primary" data-action="export-json">${icon('download',17)} Exporter JSON</button>
+        <button class="button secondary" data-action="export-csv">Exporter CSV</button>
+        <button class="button secondary" data-action="import">Importer JSON</button>
+        <input hidden type="file" id="import-json" accept=".json,application/json"></div>
+    </section>
+    <section class="card settings-card">
+      <h2>Installer sur iPhone</h2>
+      <p>Ouvre cette adresse dans Safari. Dans le menu Partager, sélectionne « Sur l’écran d’accueil » puis « Ajouter ». Ouvre une première fois l’app avec une connexion pour préparer le mode hors ligne.</p>
+    </section>
+    <section class="card settings-card"><h2>Effacer les données</h2>
+      <p>Cette action supprime les séances, les brouillons et les charges mémorisées de cette app sur l’appareil.</p>
+      <button class="button text-danger" data-action="erase">Effacer les données locales</button>
+    </section>`;
+}
+
+function openEditor(title, contents, trigger, className = '') {
+  editorTrigger = trigger;
+  editor.className = className;
+  editor.innerHTML = `<div class="dialog-head"><h2 id="editor-title">${title}</h2>
+    <button type="button" class="icon-button" data-action="close" aria-label="Fermer">${icon('close')}</button></div>${contents}`;
+  if (!editor.open) editor.showModal();
+}
+
+editor.addEventListener('click', event => {
+  if (event.target === editor) editor.close();
+});
+editor.addEventListener('close', () => {
+  stopMotion?.();
+  stopMotion = null;
+  if (!editorTrigger) return;
+  document.getElementById(editorTrigger)?.focus({preventScroll: true});
+  editorTrigger = null;
+});
+
+function openLoad(ex, trigger, pendingIndex) {
+  const current = exerciseLoad(data, workout, ex.id, Boolean(editId));
+  const band = isBand(ex);
+  openEditor(band ? 'Bandes utilisées' : 'Charge utilisée', `
+    <p class="dialog-context">${escapeHTML(ex.name)}</p>
+    <form id="load-form">
+      <label class="field" for="edit-load">${band ? 'Couleur ou combinaison' : escapeHTML(ex.unit)}</label>
+      <input autofocus id="edit-load" value="${escapeHTML(current)}" inputmode="${band ? 'text' : 'decimal'}" maxlength="60" placeholder="${band ? 'P. ex. rouge + noire' : 'P. ex. 12,5'}" autocomplete="off" required>
+      <p class="help-text">${editId ? 'Appliquée aux prochaines séries cochées de cette séance.' : 'Mémorisée pour cet exercice dans les séances A et B. Les séries déjà validées gardent leur charge.'}</p>
+      <p class="form-error" id="load-error" role="alert" hidden></p>
+      <div class="actions">
+        <button class="button primary" type="submit">${pendingIndex === undefined ? 'Mémoriser' : 'Mémoriser et valider'}</button>
+        <button class="button secondary" type="button" data-action="skip-load">${pendingIndex === undefined ? 'Sans charge notée' : 'Valider sans charge'}</button>
+      </div>
+    </form>`, trigger);
+  const input = editor.querySelector('#edit-load');
+  editor.querySelector('#load-form').onsubmit = event => {
+    event.preventDefault();
+    const load = parseLoad(ex, input.value);
+    if (load === null) {
+      const error = editor.querySelector('#load-error');
+      error.textContent = band ? 'Indique une bande ou une combinaison.' : 'Entre un poids en kg, par exemple 12,5.';
+      error.hidden = false;
+      input.focus();
+      return;
+    }
+    applyLoad(ex, load, pendingIndex, trigger);
+  };
+  editor.querySelector('[data-action="skip-load"]').onclick = () => applyLoad(ex, '', pendingIndex, trigger);
+}
+
+function applyLoad(ex, load, pendingIndex, trigger) {
+  const skipped = {...workout.skipped};
+  if (!load) skipped[ex.id] = 'yes';
+  else delete skipped[ex.id];
+  const next = {...workout, loads: {...workout.loads, [ex.id]: load}, skipped};
+  const loads = editId || !load ? data.loads : {...data.loads, [ex.id]: load};
+  if (pendingIndex !== undefined) {
+    if (!applySet(ex, pendingIndex, next, loads, trigger)) return;
+  } else {
+    if (!storeWorkout(next, loads)) return;
+    render({keepPosition:true, focusId:trigger});
+    if (load) toast(editId ? 'Charge modifiée pour cette séance.' : 'Charge mémorisée.');
+  }
+  editor.close();
+}
+
+function openReps(ex, index, trigger) {
+  const saved = workout.exercises[ex.id][index];
+  openEditor('Répétitions', `<p class="dialog-context">${escapeHTML(ex.name)} · Série ${index + 1}</p>
+    <form id="reps-form">
+      <label class="field" for="edit-reps">${ex.target.includes('/') ? 'Répétitions ' + escapeHTML(ex.target.split('/')[1].trim() === 'jambe' ? 'par jambe' : 'par côté') : 'Nombre de répétitions'}</label>
+      <div class="stepper">
+        <button type="button" class="button secondary" data-step="-1" aria-label="Retirer une répétition">${icon('minus')}</button>
+        <input autofocus id="edit-reps" type="number" inputmode="numeric" min="0" max="999" step="1" required value="${escapeHTML(saved.reps || defaultReps(ex))}">
+        <button type="button" class="button secondary" data-step="1" aria-label="Ajouter une répétition">${icon('plus')}</button>
+      </div>
+      <button class="button primary" type="submit">Enregistrer</button>
+    </form>`, trigger);
+  const input = editor.querySelector('#edit-reps');
+  editor.querySelectorAll('[data-step]').forEach(button => button.onclick = () => {
+    input.value = Math.min(999, Math.max(0, Number(input.value) + Number(button.dataset.step)));
+  });
+  editor.querySelector('#reps-form').onsubmit = event => {
+    event.preventDefault();
+    const next = withSet(workout, ex, index, {...saved, reps: String(Number(input.value))});
+    if (!storeWorkout(next)) return;
+    render({keepPosition: true, focusId: trigger});
+    editor.close();
+  };
+}
+
+const MOTION_FRAMES = 24;
+const MOTION_COLUMNS = 6;
+const MOTION_CYCLE = 4300;
+
+function technique(ex, trigger) {
+  const guide = EXPLAIN[ex.id];
+  openEditor(escapeHTML(ex.name), `<p class="dialog-context">${escapeHTML(ex.gear)}</p>
+    <figure class="movement">
+      <div class="motion-stage">
+        <img src="exercises/${ex.id}-motion.webp" alt="" width="3072" height="1344" decoding="async" aria-hidden="true">
+        <p class="motion-unavailable" hidden>Démonstration indisponible</p>
+      </div>
+      <figcaption class="motion-controls">
+        <button type="button" class="motion-play icon-button" aria-label="Lire la démonstration">${icon('play')}</button>
+        <div class="motion-timeline">
+          <label class="visually-hidden" for="motion-position">Position dans le mouvement</label>
+          <input id="motion-position" type="range" min="0" max="${MOTION_FRAMES - 1}" value="0">
+          <div class="motion-positions">
+            <button type="button" data-motion-frame="0">Départ</button>
+            <button type="button" data-motion-frame="${MOTION_FRAMES - 1}">Fin de l’effort</button>
+          </div>
+        </div>
+      </figcaption>
+    </figure>
+    <h3>Mise en place</h3><p>${escapeHTML(guide.setup)}</p>
+    <h3>Mouvement</h3><ol class="technique-steps">${guide.steps.map(step => `<li>${escapeHTML(step)}</li>`).join('')}</ol>
+    <p class="notice"><strong>À éviter</strong> ${escapeHTML(guide.avoid)}</p>
+    <p class="help-text">${escapeHTML(ex.muscles)}</p>
+    ${guide.source ? `<a class="technique-source" href="${escapeHTML(guide.source)}" target="_blank" rel="noopener noreferrer">Voir les photos de référence Bodylastics</a>` : ''}
+  `, trigger, 'wide-dialog');
+  stopMotion = connectMotion();
+}
+
+function phasePosition(phase) {
+  if (phase < 0.11) return 0;
+  if (phase < 0.46) return smoothStep((phase - 0.11) / 0.35);
+  if (phase < 0.59) return 1;
+  return 1 - smoothStep((phase - 0.59) / 0.41);
+}
+
+function smoothStep(value) {
+  return value * value * (3 - 2 * value);
+}
+
+function connectMotion() {
+  const figure = editor.querySelector('.movement');
+  const img = figure.querySelector('img');
+  const slider = figure.querySelector('input');
+  const play = figure.querySelector('.motion-play');
+  const positions = figure.querySelectorAll('[data-motion-frame]');
+  const preference = matchMedia('(prefers-reduced-motion: reduce)');
+  let handle = null;
+  let playing = false;
+  let origin;
+  let phase = 0;
+  let frame = -1;
+
+  function show(next) {
+    if (frame === next) return;
+    frame = next;
+    const column = next % MOTION_COLUMNS;
+    const row = Math.floor(next / MOTION_COLUMNS);
+    img.style.transform = `translate3d(-${column * 100 / MOTION_COLUMNS}%, -${row * 100 / (MOTION_FRAMES / MOTION_COLUMNS)}%, 0)`;
+    slider.value = next;
+    const words = next === 0 ? 'Départ' : next === MOTION_FRAMES - 1 ? 'Fin de l’effort' : Math.round(next / (MOTION_FRAMES - 1) * 100) + ' %';
+    slider.setAttribute('aria-valuetext', words);
+  }
+
+  function tick(time) {
+    origin ??= time;
+    phase = ((time - origin) % MOTION_CYCLE) / MOTION_CYCLE;
+    show(Math.round(phasePosition(phase) * (MOTION_FRAMES - 1)));
+    handle = requestAnimationFrame(tick);
+  }
+
+  function setPlaying(next) {
+    playing = next;
+    cancelAnimationFrame(handle);
+    handle = null;
+    play.setAttribute('aria-label', next ? 'Mettre la démonstration en pause' : 'Lire la démonstration');
+    play.innerHTML = icon(next ? 'pause' : 'play');
+    if (next) {
+      origin = performance.now() - phase * MOTION_CYCLE;
+      handle = requestAnimationFrame(tick);
+    }
+  }
+
+  function loadError() {
+    setPlaying(false);
+    img.hidden = true;
+    figure.querySelector('.motion-unavailable').hidden = false;
+    figure.querySelector('.motion-controls').hidden = true;
+  }
+
+  function onPreference(event) {
+    if (event.matches) setPlaying(false);
+  }
+
+  function seek(next) {
+    setPlaying(false);
+    // Invert the easing curve so playback resumes at the selected frame.
+    const fraction = next / (MOTION_FRAMES - 1);
+    const linear = 0.5 - Math.sin(Math.asin(1 - 2 * fraction) / 3);
+    phase = next === 0 ? 0 : 0.11 + 0.35 * linear;
+    show(next);
+  }
+
+  play.onclick = () => setPlaying(!playing);
+  slider.onfocus = () => { if (playing) setPlaying(false); };
+  slider.oninput = () => seek(Number(slider.value));
+  for (const position of positions) {
+    position.onclick = () => seek(Number(position.dataset.motionFrame));
+  }
+  show(0);
+  img.addEventListener('error', loadError, {once: true});
+  if (img.complete && !img.naturalWidth) loadError();
+  else if (!preference.matches) setPlaying(true);
+  preference.addEventListener('change', onPreference);
+  return () => {
+    cancelAnimationFrame(handle);
+    preference.removeEventListener('change', onPreference);
+    img.removeEventListener('error', loadError);
+  };
+}
+
+function withSet(draft, ex, index, value) {
+  const sets = [...draft.exercises[ex.id]];
+  sets[index] = value;
+  return {...draft, exercises: {...draft.exercises, [ex.id]: sets}};
+}
+
+function applySet(ex, index, draft, loads, trigger) {
+  const previous = draft.exercises[ex.id][index];
+  const done = !previous.done;
+  const set = done ? {
+    done: true, load: exerciseLoad(data, draft, ex.id, Boolean(editId)),
+    reps: previous.reps || defaultReps(ex)
+  } : {...previous, done: false, load: ''};
+  const timer = done && !editId && data.settings.autoRest ? timerFor(data.settings.rest) : data.timer;
+  const updated = withSet(draft, ex, index, set);
+  if (done) updated.loads = {...updated.loads, [ex.id]: set.load};
+  if (!storeWorkout(updated, loads, timer)) return false;
+  render({keepPosition:true, focusId:trigger});
+  return true;
+}
+
+function toggleSet(ex, index, trigger) {
+  if (!workout.exercises[ex.id][index].done && !exerciseLoad(data, workout, ex.id, Boolean(editId)) && !workout.skipped[ex.id]) {
+    openLoad(ex, trigger, index);
+    return;
+  }
+  applySet(ex, index, workout, data.loads, trigger);
+}
+
+function selectWorkout(next) {
+  if (page === 'workout' && next.workout === selection.workout && next.date === selection.date && !editId) return;
+  if (!commit({...data, selection: next})) return;
+  selection = next;
+  editId = null;
+  workout = makeDraft(data, selection, editId);
+  page = 'workout';
+  render();
+}
+
+function saveSession() {
+  const count = countDone(workout);
+  if (!count) return;
+  const existing = data.sessions.find(session => session.id === editId);
+  const saved = {
+    ...workout, id: existing?.id || (globalThis.crypto?.randomUUID?.() ?? 'session-' + Date.now() + '-' + Math.random().toString(36).slice(2)),
+    created: existing?.created || new Date().toISOString()
+  };
+  const drafts = {...data.drafts};
+  delete drafts[draftKey(selection, editId)];
+  const sessions = existing ? data.sessions.map(session => session.id === editId ? saved : session) : [...data.sessions, saved];
+  const next = {...data, drafts, sessions};
+  if (!editId) {
+    delete next.selection;
+    delete next.timer;
+  }
+  if (!commit(next)) return;
+  closeSession('history');
+  toast('Séance enregistrée.');
+}
+
+function closeSession(destination) {
+  editId = null;
+  selection = nextDateWorkout(data);
+  workout = makeDraft(data, selection, editId);
+  page = destination;
+  render();
+}
+
+function editSession(id) {
+  const session = data.sessions.find(item => item.id === id);
+  if (!session) return;
+  editId = id;
+  selection = {date: session.date, workout: session.workout};
+  workout = makeDraft(data, selection, editId);
+  page = 'workout';
+  render();
+}
+
+function deleteSession(id) {
+  if (!confirm('Supprimer cette séance du journal ?')) return;
+  const drafts = {...data.drafts};
+  delete drafts['edit_' + id];
+  if (!commit({...data, drafts, sessions: data.sessions.filter(session => session.id !== id)})) return;
+  render({keepPosition: true});
+  toast('Séance supprimée.');
+}
+
+function clockText(seconds) {
+  return Math.floor(seconds / 60) + ':' + String(seconds % 60).padStart(2, '0');
+}
+
+function timerFor(duration) {
+  return {end: Date.now() + duration * 1000, duration};
+}
+
+function timerAction(seconds) {
+  const timer = seconds ? timerFor(seconds) : undefined;
+  if (commit({...data, timer})) updateTimer(false);
+}
+
+function updateTimer(notify = true) {
+  const panel = document.querySelector('#timer');
+  const timer = data.timer;
+  if (!timer) {
+    panel.hidden = true;
+    delete panel.dataset.end;
+    return;
+  }
+  const left = Math.max(0, Math.ceil((timer.end - Date.now()) / 1000));
+  if (!left && Date.now() - timer.end > 4 * 60 * 1000) {
+    panel.hidden = true;
+    return;
+  }
+  panel.hidden = false;
+  if (panel.dataset.end !== String(timer.end)) {
+    panel.dataset.end = timer.end;
+    panel.innerHTML = `<span class="timer-icon">${icon('clock',20)}</span><div><span id="timer-label">Repos</span><strong id="timer-time"></strong></div>
+      <button class="button timer-add" data-action="add-time">+15 s</button>
+      <button class="icon-button" data-action="stop-timer" aria-label="Fermer le chronomètre">${icon('close')}</button>`;
+  }
+  panel.querySelector('#timer-time').textContent = clockText(left);
+  panel.querySelector('#timer-label').textContent = left ? 'Repos' : 'Repos terminé';
+  if (!left && notify && notifiedTimer !== timer.end) {
+    notifiedTimer = timer.end;
+    if (navigator.vibrate) navigator.vibrate(140);
+    toast('Temps de repos terminé.');
+  }
+}
+
+function download(name, content, type) {
+  const url = URL.createObjectURL(new Blob([content], {type: type + ';charset=utf-8'}));
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = name;
+  document.body.append(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 5000);
+}
+
+function exportJson() {
+  if (storageProblem) {
+    try {
+      const raw = localStorage.getItem(STORE);
+      if (raw) download('home-gym-donnees-locales-' + localDate() + '.json', raw, 'application/json');
+      else toast('Aucune donnée locale à exporter.');
+    } catch { toast('Stockage indisponible.'); }
+    return;
+  }
+  download('home-gym-sauvegarde-' + localDate() + '.json',
+    JSON.stringify({app: 'Home Gym', exported: new Date().toISOString(), data}, null, 2), 'application/json');
+}
+
+function csvCell(value) {
+  let field = String(value ?? '');
+  if (/^[\s]*[=+\-@]|^[\t\r\n]/.test(field)) field = "'" + field;
+  return '"' + field.replace(/"/g, '""') + '"';
+}
+
+function exportCsv() {
+  const rows = [['Date','Séance','Exercice','Série','Charge / bande','Répétitions','Validée','Notes']];
+  for (const session of sortSessions(data.sessions)) {
+    for (const [id, sets] of Object.entries(session.exercises)) {
+      const name = TRACKED_EXERCISES.find(ex => ex.id === id)?.name || id;
+      sets.forEach((set, index) => rows.push([session.date, session.workout, name, index + 1, set.load, set.reps, set.done ? 'Oui' : 'Non', session.notes]));
+    }
+  }
+  download('home-gym-journal-' + localDate() + '.csv', '\ufeff' + rows.map(row => row.map(csvCell).join(';')).join('\r\n'), 'text/csv');
+}
+
+async function importJson(input) {
+  const file = input.files?.[0];
+  input.value = '';
+  if (!file) return;
+  let imported;
+  try {
+    const document = JSON.parse(await file.text());
+    imported = normalizeData(document.data || document);
+    delete imported.timer;
+  } catch {
+    toast('Ce fichier n’est pas une sauvegarde Home Gym compatible.');
+    return;
+  }
+  if (!confirm(`Importer ${imported.sessions.length} séance(s) ? Les données locales actuelles seront remplacées.`)) return;
+  if (!commit(imported, true)) return;
+  closeSession('settings');
+  toast('Sauvegarde importée.');
+}
+
+function setSettings(values) {
+  return commit({...data, settings: {...data.settings, ...values}});
+}
+
+app.addEventListener('click', event => {
+  const button = event.target.closest('button');
+  if (!button) return;
+  const {action, ex: exId, set, seconds, id, week} = button.dataset;
+  if (button.dataset.page) {
+    if (button.dataset.page === page) return;
+    page = button.dataset.page;
+    render({focusId: 'content'});
+    return;
+  }
+  const ex = TRACKED_EXERCISES.find(item => item.id === exId);
+  if (!action && button.dataset.workout) selectWorkout({...selection, workout: button.dataset.workout});
+  if (action === 'load') openLoad(ex, button.id);
+  if (action === 'reps') openReps(ex, Number(set), button.id);
+  if (action === 'set') toggleSet(ex, Number(set), button.id);
+  if (action === 'technique') technique(ex, button.id);
+  if (action === 'choose-rest') openEditor('Chronomètre de repos', `<div class="segments dialog-rest" role="group" aria-label="Lancer le repos">
+    ${[60,90,120].map(delay => `<button data-seconds="${delay}">${clockText(delay)}</button>`).join('')}
+  </div>`, button.id);
+  if (action === 'start-timer') timerAction(Number(seconds));
+  if (action === 'stop-timer') timerAction(0);
+  if (action === 'add-time') {
+    const end = Math.max(data.timer.end, Date.now()) + 15000;
+    if (commit({...data, timer: {...data.timer, end}})) {
+      updateTimer(false);
+      document.querySelector('[data-action="add-time"]').focus({preventScroll: true});
+    }
+  }
+  if (action === 'save-session') saveSession();
+  if (action === 'edit-session') editSession(id);
+  if (action === 'exit-edit') closeSession('history');
+  if (action === 'delete-session') deleteSession(id);
+  if (action === 'resume') selectWorkout({date: button.dataset.date, workout: button.dataset.workout});
+  if (action === 'week' && setSettings({week: Number(week)})) render({keepPosition:true, focusId:button.id});
+  if (action === 'export-json') exportJson();
+  if (action === 'export-csv') exportCsv();
+  if (action === 'import') document.querySelector('#import-json').click();
+  if (action === 'erase' && confirm('Effacer toutes les données Home Gym de cet appareil ?') && commit(newData(), true)) {
+    closeSession('settings');
+    toast('Données locales effacées.');
+  }
+});
+
+editor.addEventListener('click', event => {
+  const delay = event.target.closest('[data-seconds]')?.dataset.seconds;
+  if (delay) {
+    timerAction(Number(delay));
+    editor.close();
+  }
+  if (event.target.closest('[data-action="close"]')) editor.close();
+});
+
+app.addEventListener('input', event => {
+  if (event.target.id === 'session-notes' && !storeWorkout({...workout, notes: event.target.value})) {
+    event.target.value = workout.notes;
+  }
+});
+
+app.addEventListener('change', event => {
+  const {id, value, checked} = event.target;
+  if (id === 'workout-date') {
+    if (isDate(value)) selectWorkout({...selection, date: value});
+    else event.target.value = selection.date;
+  }
+  if (id === 'chart-ex') {
+    chartId = value;
+    render({keepPosition:true, focusId:id});
+  }
+  if (id === 'auto-rest' && !setSettings({autoRest: checked})) event.target.checked = data.settings.autoRest;
+  if (id === 'rest-duration' && !setSettings({rest: Number(value)})) event.target.value = data.settings.rest;
+  if (id === 'import-json') importJson(event.target);
+});
+
+window.addEventListener('storage', event => {
+  if (event.key !== STORE) return;
+  try {
+    data = event.newValue ? normalizeData(JSON.parse(event.newValue)) : newData();
+  } catch { return; }
+  if (editId && !data.sessions.some(session => session.id === editId)) {
+    editId = null;
+    selection = nextDateWorkout(data);
+  }
+  workout = makeDraft(data, selection, editId);
+  if (editor.open) editor.close();
+  render({keepPosition: true});
+});
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) updateTimer();
+});
+render();
+setInterval(updateTimer, 350);
+
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+  navigator.serviceWorker.register('./sw.js', {updateViaCache:'none'}).catch(() => {});
+}

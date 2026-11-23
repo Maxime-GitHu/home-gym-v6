@@ -1,1 +1,36 @@
-const CACHE='home-gym-v6-5';const ASSETS=['./','./index.html','./style.css','./app.js','./manifest.webmanifest','./icons/icon-192.png','./icons/icon-512.png','./exercises/chest.webp','./exercises/pulldown.webp','./exercises/squat.webp','./exercises/row.webp','./exercises/curl.webp','./exercises/lateral.webp','./exercises/crunch.webp','./exercises/legcurl.webp','./exercises/legext.webp','./exercises/triceps.webp','./exercises/kickback.webp','./exercises/pallof.webp'];self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting())));self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));self.addEventListener('fetch',e=>{if(e.request.method!=='GET'||new URL(e.request.url).origin!==self.location.origin)return;e.respondWith(caches.match(e.request).then(c=>c||fetch(e.request)))});
+'use strict';
+
+const PREFIX = 'home-gym-app-';
+const CACHE = PREFIX + '7-3-' + encodeURIComponent(self.registration.scope);
+const SHELL = [
+  './index.html', './style.css', './program.js', './model.js', './app.js', './manifest.webmanifest',
+  './icons/icon-192.png', './icons/icon-512.png',
+  ...['chest','pulldown','squat','row','curl','lateral','crunch','bandcrunch','legcurl','legext','triceps','kickback','pallof','calves']
+    .map(id => './exercises/' + id + '-motion.webp')
+];
+const urls = new Set(SHELL.map(path => new URL(path, self.registration.scope).href));
+const indexUrl = new URL('./index.html', self.registration.scope).href;
+const entryPaths = new Set([new URL(self.registration.scope).pathname, new URL(indexUrl).pathname]);
+
+self.addEventListener('install', event => {
+  event.waitUntil(caches.open(CACHE)
+    .then(cache => cache.addAll(SHELL.map(path => new Request(new URL(path, self.registration.scope), {cache: 'reload'}))))
+    .then(() => self.skipWaiting()));
+});
+
+self.addEventListener('activate', event => {
+  const scope = encodeURIComponent(self.registration.scope);
+  event.waitUntil(caches.keys()
+    .then(keys => Promise.all(keys.filter(key => key.startsWith(PREFIX) && key.endsWith('-' + scope) && key !== CACHE).map(key => caches.delete(key))))
+    .then(() => self.clients.claim()));
+});
+
+self.addEventListener('fetch', event => {
+  const {request} = event;
+  if (request.method !== 'GET' || !request.url.startsWith(self.registration.scope)) return;
+  if (request.mode === 'navigate' && entryPaths.has(new URL(request.url).pathname)) {
+    event.respondWith(caches.open(CACHE).then(cache => cache.match(indexUrl)).then(response => response || fetch(request)));
+  } else if (urls.has(request.url)) {
+    event.respondWith(caches.open(CACHE).then(cache => cache.match(request)).then(response => response || fetch(request)));
+  }
+});
