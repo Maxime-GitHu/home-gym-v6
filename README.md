@@ -23,6 +23,8 @@ Carnet personnel de musculation A/B pour iPhone. L’archive contient un site st
 - **Journal**. Enregistre la séance quand tu as fini. Si tu quittes l’app entre-temps, elle laisse le brouillon dans le journal. Une modification de charge dans une séance du journal s’applique à cette séance. Pour corriger une série déjà validée, décoche-la, ajuste sa charge au crayon puis recoche-la.
 - **Sauvegarde**. Le JSON transporte l’historique, les brouillons, les charges et les réglages. Le CSV sert à consulter les séries dans un tableur.
 
+Dans **Journal → Copier pour ChatGPT**, sélectionne une période et copie les séries validées en texte. Tu peux ensuite les coller dans une conversation. Les notes libres restent dans ton journal.
+
 ## Crunch à l’élastique
 
 Les nouvelles séances A proposent le crunch à genoux face à un ancrage haut, à raison de 3 séries de 12 à 15 répétitions. Les charges à la poulie restent en kg dans les anciennes séances. Si tu avais déjà commencé à noter un crunch à la poulie dans un brouillon, tu peux terminer cette séance avec la même variante. [Référence Bodylastics](https://bodylastics.com/exercises/resistance-bands/abs/kneeling-crunch)

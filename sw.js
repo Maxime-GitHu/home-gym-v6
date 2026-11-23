@@ -1,7 +1,7 @@
 'use strict';
 
 const PREFIX = 'home-gym-app-';
-const CACHE = PREFIX + '7-3-' + encodeURIComponent(self.registration.scope);
+const CACHE = PREFIX + '7-4-' + encodeURIComponent(self.registration.scope);
 const SHELL = [
   './index.html', './style.css', './program.js', './model.js', './app.js', './manifest.webmanifest',
   './icons/icon-192.png', './icons/icon-512.png',

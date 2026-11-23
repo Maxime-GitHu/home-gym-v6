@@ -223,6 +223,7 @@ function historyPage() {
     ${drafts.length ? `<h2>Séances en cours</h2><div class="record-grid">${[...drafts].reverse().map(([, draft]) => `
       <article class="card record"><p class="record-date">${escapeHTML(formatDate(draft.date))}</p><h3>Séance ${draft.workout}</h3><p>${countDone(draft)} / ${totalSets(draft.workout)} séries</p>
         <button class="button secondary" data-action="resume" data-date="${draft.date}" data-workout="${draft.workout}">Reprendre</button></article>`).join('')}</div>` : ''}
+    ${sessions.length ? `<div class="actions journal-export"><button class="button secondary" id="export-chatgpt" data-action="export-chatgpt">Copier pour ChatGPT</button></div>` : ''}
     <h2>Séances enregistrées</h2>
     ${sessions.length ? `<div class="record-grid">${sessions.map(session => `<article class="card record">
       <p class="record-date">${escapeHTML(formatDate(session.date, {weekday:'short', day:'numeric', month:'long', year:'numeric'}))}</p>
@@ -692,6 +693,68 @@ function csvCell(value) {
   return '"' + field.replace(/"/g, '""') + '"';
 }
 
+function chatExport(sessions, days, now = new Date()) {
+  const cutoff = new Date(now);
+  if (days) cutoff.setDate(cutoff.getDate() - days + 1);
+  const date = localDate(now);
+  const selected = sortSessions(sessions).reverse().filter(session =>
+    !days || (session.date <= date && session.date >= localDate(cutoff))
+  );
+  const blocks = selected.flatMap(session => {
+    const exercises = Object.entries(session.exercises).flatMap(([id, sets]) => {
+      const ex = TRACKED_EXERCISES.find(item => item.id === id);
+      const values = sets.filter(set => set.done).map(set => {
+        const reps = set.reps !== '' ? set.reps + ' rép.' : 'répétitions non notées';
+        const unilateral = ex?.target.includes('/') ? ' / ' + ex.target.split('/')[1].trim() : '';
+        return reps + unilateral + ' @ ' + (set.load !== '' ? (ex ? displayLoad(ex, set.load) : set.load) : 'charge non notée');
+      });
+      return values.length ? ['- ' + (ex?.name || id) + ' : ' + values.join(' ; ')] : [];
+    });
+    return exercises.length ? [[session.date + ' — Séance ' + session.workout, ...exercises].join('\n')] : [];
+  });
+  const period = days ? 'Du ' + localDate(cutoff) + ' au ' + date : 'Tout l’historique';
+  const heading = 'Journal Home Gym — ' + period + '\nAnalyse ma progression par exercice et les tendances observables. Signale les données manquantes.';
+  return {count: blocks.length, text: blocks.length ? [heading, ...blocks].join('\n\n') : ''};
+}
+
+function openChatExport(trigger) {
+  openEditor('Copier pour ChatGPT', `
+    <p class="dialog-context">Copie tes séries validées, puis colle le texte dans ChatGPT.</p>
+    <label class="field" for="chat-period">Période</label>
+    <select id="chat-period">
+      <option value="28">4 dernières semaines</option>
+      <option value="84">12 dernières semaines</option>
+      <option value="0">Tout l’historique</option>
+    </select>
+    <label class="field" for="chat-text">Texte à copier</label>
+    <textarea id="chat-text" rows="7" readonly></textarea>
+    <p class="help-text" id="chat-export-status" role="status"></p>
+    <button type="button" class="button primary" id="copy-chat-text">Copier le texte</button>
+  `, trigger);
+  const period = editor.querySelector('#chat-period');
+  const area = editor.querySelector('#chat-text');
+  const status = editor.querySelector('#chat-export-status');
+  const copy = editor.querySelector('#copy-chat-text');
+  function update() {
+    const report = chatExport(data.sessions, Number(period.value));
+    area.value = report.text;
+    status.textContent = report.count ? report.count + (report.count === 1 ? ' séance' : ' séances') : 'Aucune séance validée sur cette période.';
+    copy.disabled = !report.count;
+  }
+  period.onchange = update;
+  copy.onclick = async () => {
+    try {
+      await navigator.clipboard.writeText(area.value);
+      status.textContent = 'Texte copié. Tu peux le coller dans ChatGPT.';
+    } catch {
+      area.focus();
+      area.select();
+      status.textContent = 'Texte sélectionné. Utilise le menu Copier de ton appareil.';
+    }
+  };
+  update();
+}
+
 function exportCsv() {
   const rows = [['Date','Séance','Exercice','Série','Charge / bande','Répétitions','Validée','Notes']];
   for (const session of sortSessions(data.sessions)) {
@@ -762,6 +825,7 @@ app.addEventListener('click', event => {
   if (action === 'week' && setSettings({week: Number(week)})) render({keepPosition:true, focusId:button.id});
   if (action === 'export-json') exportJson();
   if (action === 'export-csv') exportCsv();
+  if (action === 'export-chatgpt') openChatExport(button.id);
   if (action === 'import') document.querySelector('#import-json').click();
   if (action === 'erase' && confirm('Effacer toutes les données Home Gym de cet appareil ?') && commit(newData(), true)) {
     closeSession('settings');

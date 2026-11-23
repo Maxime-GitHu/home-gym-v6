@@ -625,3 +625,6 @@ dialog form > .primary { margin-top: 12px; }
   font-weight: 670;
   text-underline-offset: .2em;
 }
+
+.journal-export { margin-bottom: 15px; }
+#copy-chat-text { margin-top: 5px; }
